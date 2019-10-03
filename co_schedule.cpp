@@ -20,19 +20,20 @@ int CO_SCHEDULE::_set_running_coid(int run_coid)
     return 0;
 }
 
-int CO_SCHEDULE::co_new(coroutine_func task_func)
+int CO_SCHEDULE::co_new(coroutine_func task_func, void * user_data)
 {
     int co_id = _generate_co_id();
     co_pool[co_id].status = CO_READY;
     co_pool[co_id].task_func = task_func;
+    co_pool[co_id].user_data = user_data;
     return co_id;
 }
 
-void CO_SCHEDULE::_co_entry(void *data)
+void CO_SCHEDULE::_co_entry(void * data)
 {
     std::cout<<"entry"<<std::endl;
     CO_ROUTINE *co_rountine = (CO_ROUTINE *)data;
-    co_rountine->task_func(NULL);
+    co_rountine->task_func(co_rountine->user_data);
 }
 
 // 协程开始，或者协程resume回来
