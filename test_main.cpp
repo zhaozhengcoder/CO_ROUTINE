@@ -76,4 +76,6 @@ int main()
 {
     demo1();
     // demo2();
+
+    co_schedule.co_free();
 }

@@ -42,6 +42,7 @@ public:
     int co_new(coroutine_func task_func, void *user_data);
     int co_resume(int co_id);
     int co_yeild();
+    int co_free();
 
 private:
     static void _co_entry(void *data);              // 每一个协程执行前的入口函数

@@ -90,3 +90,19 @@ void CO_SCHEDULE::_save_stack(CO_ROUTINE *C, char * top)
     C->size = top - &dummy;
     memcpy(C->stack, &dummy, C->size); // TODO - 不是很明白为什么这种方式可以保存协程栈
 }
+
+int CO_SCHEDULE::co_free()
+{
+    // 遍历map
+    for(auto iter = co_pool.begin(); iter != co_pool.end(); iter++)
+    {
+        int co_id = iter->first;
+        free(co_pool[co_id].stack);
+    }
+    return 0;
+}
+
+
+// TODO
+// 1. 封装一个单例
+// 2. 协程 class CO_ROUTINE; 里面的user_data; 
