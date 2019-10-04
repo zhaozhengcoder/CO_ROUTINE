@@ -3,6 +3,10 @@
 #include <iostream>
 #include <stdlib.h>
 
+CO_SCHEDULE * CO_SCHEDULE::instance = NULL;
+CO_SCHEDULE::CO_SCHEDULE(){}
+CO_SCHEDULE::~CO_SCHEDULE(){}
+
 int CO_SCHEDULE::_generate_co_id()
 {
     static int co_id = 1;
@@ -102,7 +106,15 @@ int CO_SCHEDULE::co_free()
     return 0;
 }
 
+CO_SCHEDULE * CO_SCHEDULE::get_instance()
+{
+    if (instance == NULL)
+    {
+        instance = new CO_SCHEDULE();
+    }
+    return instance;
+}
 
 // TODO
-// 1. 封装一个单例
+// 1. 封装一个单例 (ok)
 // 2. 协程 class CO_ROUTINE; 里面的user_data; 
