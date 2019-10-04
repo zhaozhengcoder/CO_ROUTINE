@@ -75,7 +75,7 @@ int demo2()
 int main()
 {
     demo1();
-    // demo2();
+    demo2();
 
-    // co_schedule.co_free();
+    CO_SCHEDULE::instance_free();
 }

@@ -115,6 +115,17 @@ CO_SCHEDULE * CO_SCHEDULE::get_instance()
     return instance;
 }
 
+int CO_SCHEDULE::instance_free()
+{
+    if(instance != NULL)
+    {
+        instance->co_free();
+        free(instance);
+        instance = NULL;
+    }
+    return 0;
+}
+
 // TODO
 // 1. 封装一个单例 (ok)
 // 2. 协程 class CO_ROUTINE; 里面的user_data; 

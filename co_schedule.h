@@ -44,7 +44,7 @@ public:
     int co_yeild();
     int co_free();
     static CO_SCHEDULE * get_instance();
-
+    static int instance_free();
 private:
     CO_SCHEDULE();
     ~CO_SCHEDULE();
