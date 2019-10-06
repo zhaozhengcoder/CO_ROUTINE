@@ -25,7 +25,7 @@ public:
     coroutine_func task_func;  // 每个协程执行的回调函数
     ucontext_t ctx;            // 协程的ctx
     CO_CROUTINE_STATUS status; // 当前协程的执行状态
-    void * user_data;
+    void *user_data;
 
     char *stack;    // 协程栈，用来存放协程被切换出去的时候的上下文
     ptrdiff_t cap;  // char * stack 的最大容量
@@ -42,16 +42,17 @@ public:
     int co_new(coroutine_func task_func, void *user_data);
     int co_resume(int co_id);
     int co_yeild();
-    int co_free();
-    static CO_SCHEDULE * get_instance();
+
+    static CO_SCHEDULE *get_instance();
     static int instance_free();
+
 private:
     CO_SCHEDULE();
     ~CO_SCHEDULE();
-    static CO_SCHEDULE * instance;
-
-    static void _co_entry(void *data);              // 每一个协程执行前的入口函数
-    void _save_stack(CO_ROUTINE *C, char *top);     // 协程被切换出去的时候，保存当前的协程栈
+    int co_free();
+    static CO_SCHEDULE *instance;
+    static void _co_entry(void *data);          // 每一个协程执行前的入口函数
+    void _save_stack(CO_ROUTINE *C, char *top); // 协程被切换出去的时候，保存当前的协程栈
 
     int _generate_co_id(); // 分配协程id
     int _get_running_coid();

@@ -3,9 +3,9 @@
 #include <iostream>
 #include <stdlib.h>
 
-CO_SCHEDULE * CO_SCHEDULE::instance = NULL;
-CO_SCHEDULE::CO_SCHEDULE(){}
-CO_SCHEDULE::~CO_SCHEDULE(){}
+CO_SCHEDULE *CO_SCHEDULE::instance = NULL;
+CO_SCHEDULE::CO_SCHEDULE() {}
+CO_SCHEDULE::~CO_SCHEDULE() {}
 
 int CO_SCHEDULE::_generate_co_id()
 {
@@ -24,7 +24,7 @@ int CO_SCHEDULE::_set_running_coid(int run_coid)
     return 0;
 }
 
-int CO_SCHEDULE::co_new(coroutine_func task_func, void * user_data)
+int CO_SCHEDULE::co_new(coroutine_func task_func, void *user_data)
 {
     int co_id = _generate_co_id();
     co_pool[co_id].status = CO_READY;
@@ -33,9 +33,9 @@ int CO_SCHEDULE::co_new(coroutine_func task_func, void * user_data)
     return co_id;
 }
 
-void CO_SCHEDULE::_co_entry(void * data)
+void CO_SCHEDULE::_co_entry(void *data)
 {
-    std::cout<<"entry"<<std::endl;
+    std::cout << "entry" << std::endl;
     CO_ROUTINE *co_rountine = (CO_ROUTINE *)data;
     co_rountine->task_func(co_rountine->user_data);
 }
@@ -43,28 +43,28 @@ void CO_SCHEDULE::_co_entry(void * data)
 // 协程开始，或者协程resume回来
 int CO_SCHEDULE::co_resume(int co_id)
 {
-    CO_ROUTINE & co_rountine = co_pool[co_id];
+    CO_ROUTINE &co_rountine = co_pool[co_id];
     switch (co_rountine.status)
     {
-        case CO_READY:
-            getcontext(&co_rountine.ctx);
-            co_rountine.ctx.uc_stack.ss_sp = stack;        // 设置上下文C->ctx的栈
-            co_rountine.ctx.uc_stack.ss_size = STACK_SIZE; // 设置上下文C->ctx的栈容量
-            co_rountine.ctx.uc_link = &main;               //
-            co_rountine.status = CO_RUNING;                // 修改状态
-            _set_running_coid(co_id);
-            makecontext(&co_rountine.ctx, (void(*)(void))_co_entry, 1, (void *)&co_rountine);
-            swapcontext(co_rountine.ctx.uc_link, &co_rountine.ctx);
-            break;
-        case CO_SUSPEND:
-            memcpy(stack + STACK_SIZE - co_rountine.size, co_rountine.stack, co_rountine.size);
-            co_rountine.status = CO_RUNING;
-            _set_running_coid(co_id);
-            swapcontext(&main, &co_rountine.ctx);
-            break;
-        default:
-            std::cout << "co status error, co_id"<< co_id << std::endl;
-            break;
+    case CO_READY:
+        getcontext(&co_rountine.ctx);
+        co_rountine.ctx.uc_stack.ss_sp = stack;        // 设置上下文C->ctx的栈
+        co_rountine.ctx.uc_stack.ss_size = STACK_SIZE; // 设置上下文C->ctx的栈容量
+        co_rountine.ctx.uc_link = &main;               //
+        co_rountine.status = CO_RUNING;                // 修改状态
+        _set_running_coid(co_id);
+        makecontext(&co_rountine.ctx, (void (*)(void))_co_entry, 1, (void *)&co_rountine);
+        swapcontext(co_rountine.ctx.uc_link, &co_rountine.ctx);
+        break;
+    case CO_SUSPEND:
+        memcpy(stack + STACK_SIZE - co_rountine.size, co_rountine.stack, co_rountine.size);
+        co_rountine.status = CO_RUNING;
+        _set_running_coid(co_id);
+        swapcontext(&main, &co_rountine.ctx);
+        break;
+    default:
+        std::cout << "co status error, co_id" << co_id << std::endl;
+        break;
     }
 }
 
@@ -79,7 +79,7 @@ int CO_SCHEDULE::co_yeild()
 }
 
 // 保存协程栈
-void CO_SCHEDULE::_save_stack(CO_ROUTINE *C, char * top)
+void CO_SCHEDULE::_save_stack(CO_ROUTINE *C, char *top)
 {
     char dummy = 0;
     assert(top - &dummy <= STACK_SIZE);
@@ -98,7 +98,7 @@ void CO_SCHEDULE::_save_stack(CO_ROUTINE *C, char * top)
 int CO_SCHEDULE::co_free()
 {
     // 遍历map
-    for(auto iter = co_pool.begin(); iter != co_pool.end(); iter++)
+    for (auto iter = co_pool.begin(); iter != co_pool.end(); iter++)
     {
         int co_id = iter->first;
         free(co_pool[co_id].stack);
@@ -106,7 +106,7 @@ int CO_SCHEDULE::co_free()
     return 0;
 }
 
-CO_SCHEDULE * CO_SCHEDULE::get_instance()
+CO_SCHEDULE *CO_SCHEDULE::get_instance()
 {
     if (instance == NULL)
     {
@@ -117,7 +117,7 @@ CO_SCHEDULE * CO_SCHEDULE::get_instance()
 
 int CO_SCHEDULE::instance_free()
 {
-    if(instance != NULL)
+    if (instance != NULL)
     {
         instance->co_free();
         free(instance);
@@ -128,4 +128,6 @@ int CO_SCHEDULE::instance_free()
 
 // TODO
 // 1. 封装一个单例 (ok)
-// 2. 协程 class CO_ROUTINE; 里面的user_data; 
+// 2. 协程 class CO_ROUTINE; 里面的user_data;  (ok)
+// 3. 提供判断协程状态的接口，是否可以resume，如果连续多次调用resume，你就core掉了吧
+// 3. 协程的栈有多大？最多能开辟多少个协程，每个协程的栈空间是多少？有没有限制
